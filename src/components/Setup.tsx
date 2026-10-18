@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS } from '../data/sampleQuiz';
-import { Users, Play, Minus, Plus, Clock, ArrowLeft } from 'lucide-react';
+import { Users, Play, Minus, Plus, Clock, ArrowLeft, Home } from 'lucide-react';
 
 export default function Setup() {
   const { state, dispatch } = useGame();
@@ -39,9 +39,18 @@ export default function Setup() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col items-center justify-center p-4">
       <div className="bg-slate-800/60 backdrop-blur border border-slate-700 rounded-2xl p-8 max-w-2xl w-full">
-        <div className="flex items-center gap-3 mb-8">
-          <Users className="w-8 h-8 text-indigo-400" />
-          <h2 className="text-2xl font-bold text-white">Configurare Joc</h2>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Users className="w-8 h-8 text-indigo-400" />
+            <h2 className="text-2xl font-bold text-white">Configurare Joc</h2>
+          </div>
+          <button
+            onClick={() => dispatch({ type: 'GO_BACK' })}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Înapoi
+          </button>
         </div>
 
         {/* Quiz Title */}
@@ -111,23 +120,23 @@ export default function Setup() {
           </div>
         </div>
 
-        {/* Back Button */}
-        <button
-          onClick={() => dispatch({ type: 'RESET_GAME' })}
-          className="w-full mb-4 py-3 px-6 bg-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-600 transition-all flex items-center justify-center gap-2"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Înapoi la Ecranul Principal
-        </button>
-
-        {/* Start Button */}
-        <button
-          onClick={handleStartGame}
-          className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl hover:from-green-500 hover:to-emerald-500 transition-all flex items-center justify-center gap-3 shadow-lg shadow-green-900/30"
-        >
-          <Play className="w-6 h-6" />
-          Start Joc!
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleStartGame}
+            className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl hover:from-green-500 hover:to-emerald-500 transition-all flex items-center justify-center gap-3 shadow-lg shadow-green-900/30"
+          >
+            <Play className="w-6 h-6" />
+            Start Joc!
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'RESET_GAME' })}
+            className="w-full py-3 px-6 bg-slate-700/50 text-slate-400 font-medium rounded-xl hover:bg-slate-700 hover:text-slate-300 transition-all flex items-center justify-center gap-2 text-sm"
+          >
+            <Home className="w-4 h-4" />
+            Înapoi la Ecranul Principal
+          </button>
+        </div>
       </div>
     </div>
   );

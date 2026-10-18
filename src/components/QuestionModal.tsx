@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
 import { Question } from '../types';
-import { X, Clock, Eye, Check, XCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { X, Clock, Eye, Check, XCircle, AlertTriangle, ArrowLeft, Home } from 'lucide-react';
 
 interface Props {
   question: Question;
@@ -58,12 +58,20 @@ export default function QuestionModal({ question, category, round, catIndex, qIn
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => dispatch({ type: 'RESET_GAME' })}
+              onClick={() => dispatch({ type: 'GO_BACK' })}
               className="flex items-center gap-1 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
-              title="Înapoi la Ecranul Principal"
+              title="Mergi cu un pas înapoi în joc"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Înapoi</span>
+            </button>
+            <button
+              onClick={() => dispatch({ type: 'RESET_GAME' })}
+              className="flex items-center gap-1 px-3 py-2 bg-red-900/40 border border-red-700/50 text-red-300 rounded-lg hover:bg-red-900/60 transition-colors text-sm"
+              title="Resetează jocul și mergi la ecranul principal"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Ecran Principal</span>
             </button>
             <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
               <X className="w-6 h-6 text-slate-400" />

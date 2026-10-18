@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
-import { Crown, Trophy, RotateCcw, PartyPopper, Home } from 'lucide-react';
+import { Crown, Trophy, RotateCcw, PartyPopper, Home, ArrowLeft } from 'lucide-react';
 
 interface Props {
   onRestart: () => void;
@@ -50,7 +50,7 @@ function Confetti() {
 }
 
 export default function WinnerScreen({ onRestart }: Props) {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
   const sortedTeams = [...state.teams].sort((a, b) => b.score - a.score);
   const winner = sortedTeams[0];
   const winnerIndex = state.teams.findIndex(t => t.id === winner?.id);
@@ -114,11 +114,11 @@ export default function WinnerScreen({ onRestart }: Props) {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={onRestart}
+            onClick={() => dispatch({ type: 'GO_BACK' })}
             className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center gap-3 shadow-lg"
           >
-            <RotateCcw className="w-5 h-5" />
-            Joc Nou
+            <ArrowLeft className="w-5 h-5" />
+            Înapoi
           </button>
           <button
             onClick={onRestart}

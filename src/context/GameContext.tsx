@@ -11,7 +11,26 @@ type Action =
   | { type: 'SET_FINAL_BET'; payload: { teamId: string; bet: number } }
   | { type: 'SET_FINAL_ANSWER'; payload: { teamId: string; answer: string } }
   | { type: 'SET_FINAL_RESULT'; payload: { teamId: string; result: 'correct' | 'incorrect' } }
+  | { type: 'GO_BACK' }
   | { type: 'RESET_GAME' };
+
+// Ordinea fazelor pentru navigarea "Înapoi"
+const PHASE_ORDER: GamePhase[] = [
+  'dashboard',
+  'setup',
+  'round1',
+  'bonus1',
+  'round2',
+  'bonus2',
+  'finalJeopardy',
+  'winner',
+];
+
+function getPreviousPhase(current: GamePhase): GamePhase {
+  const idx = PHASE_ORDER.indexOf(current);
+  if (idx <= 0) return 'dashboard';
+  return PHASE_ORDER[idx - 1];
+}
 
 const initialState: GameState = {
   phase: 'dashboard',
@@ -78,6 +97,8 @@ function gameReducer(state: GameState, action: Action): GameState {
       }
       return { ...state, finalResults: newResults, teams: newTeams };
     }
+    case 'GO_BACK':
+      return { ...state, phase: getPreviousPhase(state.phase) };
     case 'RESET_GAME':
       return { ...initialState };
     default:
