@@ -5,14 +5,14 @@ import QuestionModal from './QuestionModal';
 import BonusModal from './BonusModal';
 import Scoreboard from './Scoreboard';
 import { Question } from '../types';
-import { ChevronRight, Star, Zap, Trophy, ArrowRight } from 'lucide-react';
+import { ChevronRight, Star, Zap, Trophy, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface Props {
   onNextPhase: () => void;
 }
 
 export default function GameBoard({ onNextPhase }: Props) {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
   const [selectedQuestion, setSelectedQuestion] = useState<{
     question: Question;
     category: string;
@@ -95,12 +95,28 @@ export default function GameBoard({ onNextPhase }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col">
       {/* Header */}
-      <div className="p-4 text-center border-b border-slate-700/50">
-        <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-          <Zap className="w-6 h-6 text-yellow-400" />
-          {roundTitle}
-        </h2>
-        <p className="text-indigo-300 text-sm">{roundSubtitle}</p>
+      <div className="p-4 border-b border-slate-700/50">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
+          <button
+            onClick={() => {
+              if (confirm('Ești sigur că vrei să te întorci la ecranul principal? Progresul jocului va fi pierdut.')) {
+                dispatch({ type: 'RESET_GAME' });
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Înapoi
+          </button>
+          <div className="text-center flex-1">
+            <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <Zap className="w-6 h-6 text-yellow-400" />
+              {roundTitle}
+            </h2>
+            <p className="text-indigo-300 text-sm">{roundSubtitle}</p>
+          </div>
+          <div className="w-24"></div>
+        </div>
       </div>
 
       {/* Game Board Grid */}

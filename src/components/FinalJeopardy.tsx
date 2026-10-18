@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
 import Scoreboard from './Scoreboard';
-import { Crown, Clock, Check, X, Lock, Unlock } from 'lucide-react';
+import { Crown, Clock, Check, X, Lock, Unlock, ArrowLeft } from 'lucide-react';
 
 interface Props {
   onComplete: () => void;
@@ -63,12 +63,28 @@ export default function FinalJeopardy({ onComplete }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex flex-col">
       {/* Header */}
-      <div className="p-4 text-center border-b border-purple-700/50">
-        <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-          <Crown className="w-6 h-6 text-yellow-400" />
-          Final Jeopardy
-        </h2>
-        <p className="text-purple-300 text-sm">{finalQ.category}</p>
+      <div className="p-4 border-b border-purple-700/50">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <button
+            onClick={() => {
+              if (confirm('Ești sigur că vrei să te întorci la ecranul principal? Progresul jocului va fi pierdut.')) {
+                dispatch({ type: 'RESET_GAME' });
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Înapoi
+          </button>
+          <div className="text-center flex-1">
+            <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <Crown className="w-6 h-6 text-yellow-400" />
+              Final Jeopardy
+            </h2>
+            <p className="text-purple-300 text-sm">{finalQ.category}</p>
+          </div>
+          <div className="w-24"></div>
+        </div>
       </div>
 
       <div className="flex-1 p-4 overflow-auto">

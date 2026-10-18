@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS } from '../data/sampleQuiz';
-import { Users, Play, Minus, Plus, Clock } from 'lucide-react';
+import { Users, Play, Minus, Plus, Clock, ArrowLeft } from 'lucide-react';
 
 export default function Setup() {
   const { state, dispatch } = useGame();
@@ -110,6 +110,15 @@ export default function Setup() {
             <span className="text-xl font-bold text-white w-16 text-center">{timerDuration}s</span>
           </div>
         </div>
+
+        {/* Back Button */}
+        <button
+          onClick={() => dispatch({ type: 'RESET_GAME' })}
+          className="w-full mb-4 py-3 px-6 bg-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-600 transition-all flex items-center justify-center gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Înapoi la Ecranul Principal
+        </button>
 
         {/* Start Button */}
         <button

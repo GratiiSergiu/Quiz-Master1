@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
-import { Crown, Trophy, RotateCcw, PartyPopper } from 'lucide-react';
+import { Crown, Trophy, RotateCcw, PartyPopper, Home } from 'lucide-react';
 
 interface Props {
   onRestart: () => void;
@@ -111,14 +111,23 @@ export default function WinnerScreen({ onRestart }: Props) {
           </div>
         </div>
 
-        {/* Restart Button */}
-        <button
-          onClick={onRestart}
-          className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center gap-3 mx-auto shadow-lg"
-        >
-          <RotateCcw className="w-5 h-5" />
-          Joc Nou
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={onRestart}
+            className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center gap-3 shadow-lg"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Joc Nou
+          </button>
+          <button
+            onClick={onRestart}
+            className="px-8 py-4 bg-slate-700 text-slate-300 font-bold text-lg rounded-xl hover:bg-slate-600 transition-all flex items-center gap-3"
+          >
+            <Home className="w-5 h-5" />
+            Ecranul Principal
+          </button>
+        </div>
       </div>
     </div>
   );
