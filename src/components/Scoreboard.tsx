@@ -4,6 +4,12 @@ import { Crown, Trophy } from 'lucide-react';
 
 export default function Scoreboard() {
   const { state } = useGame();
+  
+  // Dacă nu există echipe, nu afișa scoreboard
+  if (state.teams.length === 0) {
+    return null;
+  }
+  
   const sortedTeams = [...state.teams].sort((a, b) => b.score - a.score);
 
   return (

@@ -51,6 +51,24 @@ function Confetti() {
 
 export default function WinnerScreen({ onRestart }: Props) {
   const { state, dispatch } = useGame();
+
+  // Verifică dacă există echipe
+  if (state.teams.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="bg-slate-800/60 backdrop-blur border border-slate-700 rounded-2xl p-8 max-w-md w-full text-center">
+          <p className="text-slate-400 mb-4">Nu există date de joc.</p>
+          <button
+            onClick={onRestart}
+            className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 transition-all"
+          >
+            Înapoi la Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const sortedTeams = [...state.teams].sort((a, b) => b.score - a.score);
   const winner = sortedTeams[0];
   const winnerIndex = state.teams.findIndex(t => t.id === winner?.id);

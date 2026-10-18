@@ -9,7 +9,7 @@ interface State {
   error: Error | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -20,37 +20,30 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    // Clear localStorage in case it's causing issues
-    try {
-      localStorage.removeItem('quizmaster_gemini_api_key');
-    } catch (e) {
-      console.error('Failed to clear localStorage:', e);
-    }
-    // Reload the page
+    // Reset localStorage și reload
+    localStorage.clear();
     window.location.reload();
   };
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
-          <div className="bg-slate-800/60 backdrop-blur border border-red-700/50 rounded-2xl p-8 max-w-lg w-full text-center">
-            <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Oops! Ceva nu a mers bine</h2>
-            <p className="text-slate-400 mb-4">
-              Aplicația a întâmpinat o eroare. Acest lucru se poate întâmpla din cauza datelor salvate în browser.
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-950 to-slate-900 flex items-center justify-center p-4">
+          <div className="bg-slate-800/80 backdrop-blur border border-red-700/50 rounded-2xl p-8 max-w-lg w-full text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold text-white mb-4">
+              Oops! Ceva nu a mers bine
+            </h1>
+            <p className="text-slate-400 mb-6">
+              Aplicația a întâmpinat o eroare neașteptată.
             </p>
             {this.state.error && (
-              <div className="bg-slate-900/50 rounded-lg p-3 mb-4 text-left">
+              <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-4 mb-6 text-left">
                 <p className="text-red-400 text-sm font-mono break-words">
                   {this.state.error.message}
                 </p>
@@ -70,5 +63,3 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

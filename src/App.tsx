@@ -8,6 +8,20 @@ import WinnerScreen from './components/WinnerScreen';
 function GameRouter() {
   const { state, dispatch } = useGame();
 
+  // Verifică dacă starea este validă pentru faza curentă
+  // Dacă nu, resetează la dashboard (de exemplu, după refresh)
+  const needsReset = 
+    (state.phase !== 'dashboard' && !state.quizData) ||
+    ((state.phase === 'round1' || state.phase === 'round2' || 
+      state.phase === 'bonus1' || state.phase === 'bonus2' ||
+      state.phase === 'finalJeopardy' || state.phase === 'winner') && 
+     state.teams.length === 0);
+
+  if (needsReset) {
+    dispatch({ type: 'RESET_GAME' });
+    return <Dashboard />;
+  }
+
   const handleNextPhase = () => {
     switch (state.phase) {
       case 'round1':

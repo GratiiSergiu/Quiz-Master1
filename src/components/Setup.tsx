@@ -9,6 +9,23 @@ export default function Setup() {
   const [teamNames, setTeamNames] = useState<string[]>(['Echipa 1', 'Echipa 2', 'Echipa 3', 'Echipa 4']);
   const [timerDuration, setTimerDuration] = useState(30);
 
+  // Verifică dacă quizData există
+  if (!state.quizData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="bg-slate-800/60 backdrop-blur border border-slate-700 rounded-2xl p-8 max-w-md w-full text-center">
+          <p className="text-slate-400 mb-4">Nu există date de concurs încărcate.</p>
+          <button
+            onClick={() => dispatch({ type: 'RESET_GAME' })}
+            className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 transition-all"
+          >
+            Înapoi la Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleNumTeamsChange = (n: number) => {
     const newNum = Math.max(2, Math.min(10, n));
     setNumTeams(newNum);

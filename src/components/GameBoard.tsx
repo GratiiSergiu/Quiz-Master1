@@ -21,7 +21,22 @@ export default function GameBoard({ onNextPhase }: Props) {
     qIndex: number;
   } | null>(null);
 
-  if (!state.quizData) return null;
+  // Verifică dacă quizData există
+  if (!state.quizData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="bg-slate-800/60 backdrop-blur border border-slate-700 rounded-2xl p-8 max-w-md w-full text-center">
+          <p className="text-slate-400 mb-4">Nu există date de concurs încărcate.</p>
+          <button
+            onClick={() => dispatch({ type: 'RESET_GAME' })}
+            className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 transition-all"
+          >
+            Înapoi la Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const isRound1 = state.phase === 'round1';
   const isBonus = state.phase === 'bonus1' || state.phase === 'bonus2';
