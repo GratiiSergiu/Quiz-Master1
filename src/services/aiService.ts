@@ -56,14 +56,61 @@ function tryFixJSON(jsonStr: string): string {
   return fixed;
 }
 
-function buildPrompt(topic: string, difficulty: 'easy' | 'medium' | 'hard', rounds: number): string {
+/**
+ * Extrage textul util dintr-un fișier HTML, eliminând tag-urile și script-urile
+ */
+function extractTextFromHTML(html: string): string {
+  // Elimină tag-urile <script> și <style> cu tot conținutul
+  let text = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<style[\s\S]*?<\/style>/gi, '');
+  text = text.replace(/<!--[\s\S]*?-->/g, '');
+  
+  // Elimină tag-urile HTML
+  text = text.replace(/<[^>]+>/g, ' ');
+  
+  // Decodifică entități HTML comune
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/&amp;/g, '&');
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&quot;/g, '"');
+  text = text.replace(/&#39;/g, "'");
+  text = text.replace(/&ndash;/g, '-');
+  text = text.replace(/&mdash;/g, '-');
+  
+  // Normalizare whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+  
+  return text;
+}
+
+/**
+ * Trunchiază textul la o anumită lungime pentru a nu depăși limita de tokeni
+ */
+function truncateText(text: string, maxLength: number = 15000): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '... [conținut trunchiat]';
+}
+
+function buildPrompt(
+  topic: string,
+  difficulty: 'easy' | 'medium' | 'hard',
+  rounds: number,
+  sourceContent?: string
+): string {
   const difficultyMap = {
     easy: 'ușor, pentru începători',
     medium: 'mediu, pentru nivel intermediar',
     hard: 'avansat, pentru experți'
   };
 
-  return `Generează un concurs tip Jeopardy/Trivia pe tema "${topic}" cu dificultate ${difficultyMap[difficulty]}.
+  const hasSourceContent = sourceContent && sourceContent.trim().length > 0;
+
+  const sourceSection = hasSourceContent
+    ? `\n\n=== CONȚINUT SURSĂ (generază întrebările EXCLUSIV pe baza acestui conținut) ===\n${truncateText(sourceContent!)}\n=== SFÂRȘIT CONȚINUT SURSĂ ===\n\nIMPORTANT: Toate întrebările, răspunsurile și explicațiile trebuie să fie bazate STRICT pe conținutul de mai sus. Nu inventa informații care nu apar în textul sursă.`
+    : '';
+
+  return `Generează un concurs tip Jeopardy/Trivia pe tema "${topic}" cu dificultate ${difficultyMap[difficulty]}.${sourceSection}
 
 Creează ${rounds} rund${rounds === 1 ? 'ă' : 'e'} principal${rounds === 1 ? 'ă' : 'e'}, fiecare cu 5 categorii și 4 întrebări per categorie.
 Pentru fiecare rundă, creează și o întrebare bonus.
@@ -79,6 +126,7 @@ Reguli stricte:
 - Întrebările trebuie să fie variate și interesante, specifice temei "${topic}"
 - Răspunsurile trebuie să fie concise și corecte
 - Explicațiile (rationale) trebuie să fie scurte dar informative
+${hasSourceContent ? '- Bazează-te EXCLUSIV pe informațiile din conținutul sursă furnizat' : ''}
 
 Format JSON exact (respectsă-l cu strictețe):
 {
@@ -164,41 +212,37 @@ export async function generateQuizWithAI(
   apiKey: string,
   topic: string,
   difficulty: 'easy' | 'medium' | 'hard',
-  rounds: number
+  rounds: number,
+  sourceContent?: string
 ): Promise<QuizData> {
-  const prompt = buildPrompt(topic, difficulty, rounds);
+  const prompt = buildPrompt(topic, difficulty, rounds, sourceContent);
   const maxRetries = 3;
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    // Încearcă fiecare model în ordine
     for (const model of GEMINI_MODELS) {
       try {
         const { text: textResponse } = await tryModel(model, apiKey, prompt);
 
-        // Extrage JSON-ul
         let jsonText: string;
         try {
           jsonText = extractJSON(textResponse);
         } catch {
-          continue; // Încearcă următorul model
+          continue;
         }
 
-        // Încearcă să parseze JSON-ul
         let quizData: QuizData;
         try {
           quizData = JSON.parse(jsonText) as QuizData;
         } catch {
-          // Încearcă să repare JSON-ul
           try {
             const fixed = tryFixJSON(jsonText);
             quizData = JSON.parse(fixed) as QuizData;
           } catch {
-            continue; // Încearcă următorul model
+            continue;
           }
         }
 
-        // Validare și completare structură
         if (!quizData.title) quizData.title = `Concurs: ${topic}`;
         if (!quizData.topic) quizData.topic = topic;
         
@@ -234,7 +278,6 @@ export async function generateQuizWithAI(
           continue;
         }
 
-        // Asigură-te că fiecare categorie are întrebări
         const ensureQuestions = (categories: any[]) => {
           return categories.map((cat: any) => ({
             category: cat.category || 'Categorie',
@@ -255,19 +298,16 @@ export async function generateQuizWithAI(
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         
-        // Dacă e eroare de model (not found, not available), încearcă următorul model
         if (lastError.message.includes('not found') || 
             lastError.message.includes('not available') ||
             lastError.message.includes('not supported')) {
           continue;
         }
         
-        // Dacă e eroare de parsare JSON, încearcă următorul model
         if (lastError.message.includes('JSON')) {
           continue;
         }
         
-        // Pentru alte erori (API key invalid, quota, etc.), oprește-te
         throw lastError;
       }
     }
@@ -275,3 +315,8 @@ export async function generateQuizWithAI(
 
   throw lastError || new Error('Eroare necunoscută la generarea concursului');
 }
+
+/**
+ * Utilitar pentru extragerea textului din HTML (exportat pentru a fi folosit în Dashboard)
+ */
+export { extractTextFromHTML };

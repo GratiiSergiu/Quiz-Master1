@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { sampleQuiz } from '../data/sampleQuiz';
 import { QuizData } from '../types';
-import { generateQuizWithAI } from '../services/aiService';
-import { Sparkles, Upload, FileText, Brain, Trophy, BookOpen, Globe, History, Key, AlertCircle } from 'lucide-react';
+import { generateQuizWithAI, extractTextFromHTML } from '../services/aiService';
+import { 
+  Sparkles, Upload, FileText, Brain, Trophy, BookOpen, Globe, History, 
+  Key, AlertCircle, Save, Trash2, FileUp, CheckCircle, X
+} from 'lucide-react';
+
+const API_KEY_STORAGE_KEY = 'quizmaster_gemini_api_key';
 
 export default function Dashboard() {
   const { dispatch } = useGame();
@@ -15,6 +20,64 @@ export default function Dashboard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [hasSavedKey, setHasSavedKey] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  
+  // Fișier sursă
+  const [sourceFile, setSourceFile] = useState<File | null>(null);
+  const [sourceContent, setSourceContent] = useState<string>('');
+  const [sourceFileName, setSourceFileName] = useState<string>('');
+
+  // Încarcă cheia API salvată la mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if (savedKey) {
+      setApiKey(savedKey);
+      setHasSavedKey(true);
+    }
+  }, []);
+
+  const handleSaveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem(API_KEY_STORAGE_KEY, apiKey.trim());
+      setHasSavedKey(true);
+    }
+  };
+
+  const handleDeleteApiKey = () => {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    setApiKey('');
+    setHasSavedKey(false);
+  };
+
+  const handleSourceFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSourceFile(file);
+    setSourceFileName(file.name);
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const content = ev.target?.result as string;
+      
+      // Dacă e HTML, extrage textul util
+      if (file.name.toLowerCase().endsWith('.html') || file.name.toLowerCase().endsWith('.htm')) {
+        const extractedText = extractTextFromHTML(content);
+        setSourceContent(extractedText);
+      } else {
+        // Pentru TXT și alte fișiere text
+        setSourceContent(content);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClearSourceFile = () => {
+    setSourceFile(null);
+    setSourceContent('');
+    setSourceFileName('');
+  };
 
   const handleAIGenerate = async () => {
     if (!topic.trim()) {
@@ -31,13 +94,18 @@ export default function Dashboard() {
     setError('');
 
     try {
-      const quizData = await generateQuizWithAI(apiKey, topic, difficulty, rounds);
+      const quizData = await generateQuizWithAI(
+        apiKey, 
+        topic, 
+        difficulty, 
+        rounds,
+        sourceContent || undefined
+      );
       dispatch({ type: 'SET_QUIZ_DATA', payload: quizData });
       dispatch({ type: 'SET_PHASE', payload: 'setup' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Eroare la generarea concursului';
       
-      // Mesaje de eroare mai prietenoase
       if (message.includes('API key') || message.includes('401') || message.includes('API_KEY_INVALID')) {
         setError('Cheia API este invalidă. Verifică cheia și încearcă din nou.');
       } else if (message.includes('JSON') || message.includes('pars')) {
@@ -143,13 +211,51 @@ export default function Dashboard() {
                 <Key className="w-4 h-4 inline mr-1" />
                 Cheie API Google Gemini
               </label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Introdu cheia API (ex: AIzaSy...)"
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
-              />
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <input
+                    type={showKey ? 'text' : 'password'}
+                    value={apiKey}
+                    onChange={(e) => {
+                      setApiKey(e.target.value);
+                      setHasSavedKey(false);
+                    }}
+                    placeholder="Introdu cheia API (ex: AIzaSy...)"
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 text-xs"
+                  >
+                    {showKey ? 'Ascunde' : 'Arată'}
+                  </button>
+                </div>
+                {hasSavedKey ? (
+                  <button
+                    onClick={handleDeleteApiKey}
+                    className="px-4 py-3 bg-red-900/40 border border-red-700/50 text-red-300 rounded-xl hover:bg-red-900/60 transition-colors flex items-center gap-2"
+                    title="Șterge cheia salvată"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSaveApiKey}
+                    disabled={!apiKey.trim()}
+                    className="px-4 py-3 bg-green-900/40 border border-green-700/50 text-green-300 rounded-xl hover:bg-green-900/60 transition-colors flex items-center gap-2 disabled:opacity-50"
+                    title="Salvează cheia"
+                  >
+                    <Save className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              {hasSavedKey && (
+                <div className="flex items-center gap-2 mt-2 text-green-400 text-xs">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Cheia este salvată local în browser</span>
+                </div>
+              )}
               <p className="text-xs text-slate-500 mt-1">
                 Obține o cheie gratuită de la{' '}
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline">
@@ -184,6 +290,49 @@ export default function Dashboard() {
                 placeholder="Ex: Epistola către Romani, Capitalele Europei..."
                 className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
               />
+            </div>
+
+            {/* Source File Upload */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                <FileUp className="w-4 h-4 inline mr-1" />
+                Fișier sursă (opțional) - HTML, TXT
+              </label>
+              <p className="text-xs text-slate-500 mb-2">
+                Încarcă un fișier HTML sau TXT cu conținut relevant. AI-ul va genera întrebări bazate pe acest conținut.
+              </p>
+              {!sourceFile ? (
+                <input
+                  type="file"
+                  accept=".html,.htm,.txt"
+                  onChange={handleSourceFileUpload}
+                  className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
+                />
+              ) : (
+                <div className="bg-slate-900/50 border border-indigo-600/50 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-indigo-400" />
+                      <span className="text-white font-medium text-sm">{sourceFileName}</span>
+                    </div>
+                    <button
+                      onClick={handleClearSourceFile}
+                      className="p-1 hover:bg-slate-700 rounded transition-colors"
+                      title="Elimină fișierul"
+                    >
+                      <X className="w-4 h-4 text-slate-400" />
+                    </button>
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    <p className="mb-1">
+                      <span className="text-indigo-300">Lungime:</span> {sourceContent.length} caractere
+                    </p>
+                    <p className="bg-slate-800 rounded p-2 max-h-24 overflow-y-auto font-mono text-xs">
+                      {sourceContent.substring(0, 200)}{sourceContent.length > 200 ? '...' : ''}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Difficulty and Rounds */}
