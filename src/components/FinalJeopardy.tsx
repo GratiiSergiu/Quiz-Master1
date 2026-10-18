@@ -66,11 +66,7 @@ export default function FinalJeopardy({ onComplete }: Props) {
       <div className="p-4 border-b border-purple-700/50">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <button
-            onClick={() => {
-              if (confirm('Ești sigur că vrei să te întorci la ecranul principal? Progresul jocului va fi pierdut.')) {
-                dispatch({ type: 'RESET_GAME' });
-              }
-            }}
+            onClick={() => dispatch({ type: 'RESET_GAME' })}
             className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />

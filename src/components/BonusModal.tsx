@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_TEXT_COLORS } from '../data/sampleQuiz';
 import { BonusQuestion } from '../types';
-import { X, Clock, Eye, Check, XCircle, Star } from 'lucide-react';
+import { X, Clock, Eye, Check, XCircle, Star, ArrowLeft } from 'lucide-react';
 
 interface Props {
   question: BonusQuestion;
@@ -56,8 +56,16 @@ export default function BonusModal({ question, bonusKey, onClose }: Props) {
               <h3 className="text-xl font-bold text-white">{question.category}</h3>
             </div>
           </div>
-          <div className="text-right">
+          <div className="flex items-center gap-3">
             <span className="text-2xl font-bold text-yellow-400">{question.points} pct</span>
+            <button
+              onClick={() => dispatch({ type: 'RESET_GAME' })}
+              className="flex items-center gap-1 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-colors text-sm"
+              title="Înapoi la Ecranul Principal"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Înapoi</span>
+            </button>
           </div>
         </div>
 
