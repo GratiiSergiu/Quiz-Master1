@@ -35,7 +35,20 @@ export default function Dashboard() {
       dispatch({ type: 'SET_QUIZ_DATA', payload: quizData });
       dispatch({ type: 'SET_PHASE', payload: 'setup' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Eroare la generarea concursului');
+      const message = err instanceof Error ? err.message : 'Eroare la generarea concursului';
+      
+      // Mesaje de eroare mai prietenoase
+      if (message.includes('API key') || message.includes('401') || message.includes('API_KEY_INVALID')) {
+        setError('Cheia API este invalidă. Verifică cheia și încearcă din nou.');
+      } else if (message.includes('JSON') || message.includes('pars')) {
+        setError('AI-ul nu a putut genera un JSON valid după mai multe încercări. Încearcă o temă mai simplă sau folosește opțiunea "Demo Rapid".');
+      } else if (message.includes('quota') || message.includes('429')) {
+        setError('Limita de cereri API a fost depășită. Așteaptă puțin și încearcă din nou.');
+      } else if (message.includes('not found') || message.includes('not available')) {
+        setError('Modelul AI nu este disponibil momentan. Încearcă din nou în câteva momente.');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsGenerating(false);
     }
