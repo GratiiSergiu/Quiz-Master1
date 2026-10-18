@@ -30,24 +30,39 @@ export default function Dashboard() {
 
   // Încarcă cheia API salvată la mount
   useEffect(() => {
-    const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (savedKey) {
-      setApiKey(savedKey);
-      setHasSavedKey(true);
+    try {
+      const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (savedKey) {
+        setApiKey(savedKey);
+        setHasSavedKey(true);
+      }
+    } catch (error) {
+      console.error('Failed to load API key from localStorage:', error);
+      // Dacă localStorage nu este disponibil, continuă fără cheia salvată
     }
   }, []);
 
   const handleSaveApiKey = () => {
     if (apiKey.trim()) {
-      localStorage.setItem(API_KEY_STORAGE_KEY, apiKey.trim());
-      setHasSavedKey(true);
+      try {
+        localStorage.setItem(API_KEY_STORAGE_KEY, apiKey.trim());
+        setHasSavedKey(true);
+      } catch (error) {
+        console.error('Failed to save API key:', error);
+        setError('Nu s-a putut salva cheia API. Verifică setările browserului.');
+      }
     }
   };
 
   const handleDeleteApiKey = () => {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
-    setApiKey('');
-    setHasSavedKey(false);
+    try {
+      localStorage.removeItem(API_KEY_STORAGE_KEY);
+      setApiKey('');
+      setHasSavedKey(false);
+    } catch (error) {
+      console.error('Failed to delete API key:', error);
+      setError('Nu s-a putut șterge cheia API.');
+    }
   };
 
   const handleSourceFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
