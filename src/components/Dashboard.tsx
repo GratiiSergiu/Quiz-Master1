@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { sampleQuiz } from '../data/sampleQuiz';
 import { QuizData } from '../types';
-import { Sparkles, Upload, FileText, Brain, Trophy, BookOpen, Globe, History } from 'lucide-react';
+import { generateQuizWithAI } from '../services/aiService';
+import { Sparkles, Upload, FileText, Brain, Trophy, BookOpen, Globe, History, Key, AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
   const { dispatch } = useGame();
@@ -13,25 +14,31 @@ export default function Dashboard() {
   const [jsonInput, setJsonInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [apiKey, setApiKey] = useState('');
 
-  const handleAIGenerate = () => {
+  const handleAIGenerate = async () => {
     if (!topic.trim()) {
       setError('Te rog introdu un subiect!');
       return;
     }
+    
+    if (!apiKey.trim()) {
+      setError('Te rog introdu cheia API Google Gemini!');
+      return;
+    }
+
     setIsGenerating(true);
     setError('');
-    // Simulate AI generation with sample data
-    setTimeout(() => {
-      const quizData: QuizData = {
-        ...sampleQuiz,
-        title: `Concurs: ${topic}`,
-        topic: topic,
-      };
+
+    try {
+      const quizData = await generateQuizWithAI(apiKey, topic, difficulty, rounds);
       dispatch({ type: 'SET_QUIZ_DATA', payload: quizData });
       dispatch({ type: 'SET_PHASE', payload: 'setup' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Eroare la generarea concursului');
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   const handleImportJSON = () => {
@@ -117,6 +124,28 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-5">
+            {/* API Key Input */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                <Key className="w-4 h-4 inline mr-1" />
+                Cheie API Google Gemini
+              </label>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Introdu cheia API (ex: AIzaSy...)"
+                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Obține o cheie gratuită de la{' '}
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline">
+                  Google AI Studio
+                </a>
+              </p>
+            </div>
+
+            {/* Topic Input */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Subiectul concursului</label>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -144,6 +173,7 @@ export default function Dashboard() {
               />
             </div>
 
+            {/* Difficulty and Rounds */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Dificultate</label>
@@ -170,8 +200,15 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-start gap-2 p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
+            )}
 
+            {/* Action Buttons */}
             <div className="flex gap-3">
               <button
                 onClick={handleAIGenerate}
