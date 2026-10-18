@@ -2,9 +2,17 @@
 
 html, body, #root {
   min-height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
   background-color: #0f172a;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Custom scrollbar */
@@ -53,16 +61,6 @@ input[type="range"]::-moz-range-thumb {
   background: #6366f1;
   cursor: pointer;
   border: 2px solid #818cf8;
-}
-
-/* Animation for game cells */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
-}
-
-.game-cell:hover {
-  animation: pulse-glow 1.5s ease-in-out infinite;
 }
 
 /* Number input hide arrows */

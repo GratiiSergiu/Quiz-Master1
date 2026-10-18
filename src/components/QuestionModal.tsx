@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
 import { Question } from '../types';
@@ -20,9 +20,9 @@ export default function QuestionModal({ question, category, round, catIndex, qIn
   const [timerRunning, setTimerRunning] = useState(false);
   const [scored, setScored] = useState(false);
 
-  const startTimer = useCallback(() => {
+  const startTimer = () => {
     setTimerRunning(true);
-  }, []);
+  };
 
   useEffect(() => {
     if (!timerRunning || timeLeft <= 0) {

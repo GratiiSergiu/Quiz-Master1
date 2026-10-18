@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { TEAM_COLORS, TEAM_TEXT_COLORS } from '../data/sampleQuiz';
 import Scoreboard from './Scoreboard';
@@ -17,9 +17,9 @@ export default function FinalJeopardy({ onComplete }: Props) {
   const [showAnswer, setShowAnswer] = useState(false);
   const [results, setResults] = useState<Record<string, 'correct' | 'incorrect'>>({});
 
-  const startTimer = useCallback(() => {
+  const startTimer = () => {
     setTimerRunning(true);
-  }, []);
+  };
 
   useEffect(() => {
     if (!timerRunning || timeLeft <= 0) {

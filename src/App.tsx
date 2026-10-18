@@ -53,12 +53,10 @@ function GameRouter() {
   }
 }
 
-function App() {
+export default function App() {
   return (
     <GameProvider>
       <GameRouter />
     </GameProvider>
   );
 }
-
-export default App;
